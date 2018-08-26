@@ -1,0 +1,9 @@
+version: '3'
+services:
+  cronflow:
+    restart: "no"
+    build: .
+    volumes:
+      - "./:/cronflow-agent"
+    working_dir: /cronflow-agent
+    command: "npm run dev"
