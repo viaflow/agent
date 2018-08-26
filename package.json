@@ -1,8 +1,8 @@
 {
-  "name": "node-babel",
-  "code": "nb",
+  "name": "cronflow-agnet",
+  "code": "agnet",
   "version": "1.0.0",
-  "description": "server application starter with babel, no HTTP hosting offered",
+  "description": "cronflow agnet to handle cronjobs that triggered",
   "main": "dist/index.js",
   "scripts": {
     "lint": "esw -w src test",
@@ -16,14 +16,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sirius1024/node-babel.git"
+    "url": "git+https://github.com/viaflow/agent.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Guo Tuo <guotuo1024@gmail.com>",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/sirius1024/node-babel/issues"
+    "url": "https://github.com/viaflow/agent/issues"
   },
-  "homepage": "https://github.com/sirius1024/node-babel#readme",
+  "homepage": "https://github.com/viaflow/agent#readme",
   "babel": {
     "presets": [
       [
