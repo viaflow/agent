@@ -4,6 +4,27 @@ import {
     Flow, Node, Plugin,
 } from '../models';
 
+export const runNodes = async (flowNodes, previewData) => {
+    const conditioned = flowNodes.filter(n => n.signal === 'ANY');// 需要执行的node
+    if (previewData && previewData.code === true) {
+        conditioned.push(...(flowNodes.filter(n => n.signal === 'SUCCESS')));
+    }
+    if (previewData && previewData.code === false) {
+        conditioned.push(...(flowNodes.filter(n => n.signal === 'FAILURE')));
+    }
+    for (let i = 0, len = conditioned.length; i < len; i += 1) {
+        const currentNode = conditioned[i];
+        // eslint-disable-next-line
+        const { Execute } = require(currentNode.pluginInfo.pluginCompiledPath)
+        Execute(JSON.parse(currentNode.configurations));
+    }
+};
+/*
+const rst = {
+        code: response.statusCode && /^2/.test(`${response.statusCode}`),
+        data: response,
+    };
+*/
 export const runTypeC = async (flowId, triggerdTime) => {
     const flow = await Flow.findOne({ where: { flowId }, raw: false });
     if (flow.flowState !== 'ACTIVE') {
@@ -33,6 +54,8 @@ export const runTypeC = async (flowId, triggerdTime) => {
         item.children = nodes.filter(node => node.parentId === item.nodeId);
     }
     nodes = nodes.filter(n => n.parentId === 0);
+    Logger.log(JSON.stringify(nodes));
+    // 迭代执行所有分支
 };
 
 export const run = async () => {

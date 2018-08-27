@@ -1,11 +1,10 @@
-// import dayjs from 'dayjs';
+
 import init from './init';
-import { run } from './handlers/run.handler';
 
 init.forEach((i) => {
     i();
 });
-
+const entry = require('./handlers/run.handler');
 /**
  * 轮询Job队列（以后可能替换掉redis）
  * 如果存在被触发的Job，去数据库检查Plugin的最后更新日期信息
@@ -27,7 +26,7 @@ const setIntervalAsync = (callback, ms) => {
 
 setIntervalAsync(async () => {
     try {
-        await run();
+        await entry.run();
     } catch (e) {
         Logger.error(e);
     }

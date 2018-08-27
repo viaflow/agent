@@ -10,7 +10,7 @@ services:
     environment:
       - PORT=8080
       - DATABASE_DIALECT=mysql
-      - DATABASE_HOST=172.16.1.244
+      - DATABASE_HOST=192.168.50.109
       - DATABASE_PORT=3306
       - DATABASE_USERNAME=cronflow_user
       - DATABASE_NAME=cronflow
@@ -18,7 +18,7 @@ services:
       - TOKEN_SECRET=cronflow
       - TOKEN_EXPRIED=7d
       - TOKEN_ALGORITHMS=HS256
-      - REDIS_HOST=172.16.1.244
+      - REDIS_HOST=192.168.50.109
       - REDIS_PORT=6379
       - REDIS_AUTH=cronflow
       - REDIS_DB=0
