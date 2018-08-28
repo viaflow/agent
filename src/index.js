@@ -28,8 +28,8 @@ setIntervalAsync(async () => {
     try {
         await entry.run();
     } catch (e) {
-        Logger.error(e);
+        Logger.error(e.message);
     }
-}, 1000);
+}, 3000);
 
 // more logic here or in setIntervalAsync callback

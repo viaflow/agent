@@ -2,13 +2,14 @@ import { Op } from 'sequelize';
 import {
     uniq, find, get, replace,
 } from 'lodash';
+import dayjs from 'dayjs';
 import {
-    Flow, Node, Plugin,
+    Flow, Node, Plugin, FlowHistory,
 } from '../models';
 
 
 /* eslint-disable */
-export const runNodes = async (flowNodes, previewData) => {
+export const runNodes = async (flowNodes, previewData, processLog) => {
     const conditioned = flowNodes.filter(n => n.signal === 'ANY');// 需要执行的node
     if (previewData && previewData.code === true) {
         conditioned.push(...(flowNodes.filter(n => n.signal === 'SUCCESS')));
@@ -16,6 +17,7 @@ export const runNodes = async (flowNodes, previewData) => {
     if (previewData && previewData.code === false) {
         conditioned.push(...(flowNodes.filter(n => n.signal === 'FAILURE')));
     }
+
     for (let i = 0, len = conditioned.length; i < len; i += 1) {
         const currentNode = conditioned[i];
         const { Execute } = require(currentNode.pluginInfo.pluginCompiledPath);
@@ -28,11 +30,24 @@ export const runNodes = async (flowNodes, previewData) => {
                 configurations[key] = get(previewData, replace(v, '${preview}', 'data'));
             }
         });
-
         try {
+
             const nextData = await Execute({ data: configurations });
+
             Logger.log(`[SUCCESS] Flow(${currentNode.flowId})/Node(${currentNode.nodeId}) - ${currentNode.signal}`)
-            runNodes(currentNode.children, nextData);
+            if (processLog && processLog instanceof Array) {
+                processLog.push(Object.assign({
+                    flowId: currentNode.flowId,
+                    nodeId: currentNode.nodeId,
+                    signal: currentNode.signal,
+                    previewData: previewData,
+                }, nextData));
+            }
+            if (currentNode.children && currentNode.children.length > 0) {
+                await runNodes(currentNode.children, nextData, processLog);
+            } else {
+                return true;
+            }
         } catch (exp) {
             // 如果插件没有handle住异常，agent构建信息向下传递
             const nextData = {
@@ -41,7 +56,19 @@ export const runNodes = async (flowNodes, previewData) => {
                 data: {},
             };
             Logger.log(`[FAILURE] Flow(${currentNode.flowId})/Node(${currentNode.nodeId}) - ${currentNode.signal}, ${exp.message}`)
-            runNodes(currentNode.children, nextData);
+            if (processLog && processLog instanceof Array) {
+                processLog.push(Object.assign({
+                    flowId: currentNode.flowId,
+                    nodeId: currentNode.nodeId,
+                    signal: currentNode.signal,
+                    previewData: previewData,
+                }, nextData));
+            }
+            if (currentNode.children && currentNode.children.length > 0) {
+                await runNodes(currentNode.children, nextData, processLog);
+            } else {
+                return true;
+            }
         }
     }
 };
@@ -54,6 +81,7 @@ const rst = {
     };
 */
 export const runTypeC = async (flowId, triggerdTime) => {
+    const start = new Date();
     const flow = await Flow.findOne({ where: { flowId }, raw: false });
     if (flow.flowState !== 'ACTIVE') {
         // flow已停止，本次不指定
@@ -82,8 +110,18 @@ export const runTypeC = async (flowId, triggerdTime) => {
         item.children = nodes.filter(node => node.parentId === item.nodeId);
     }
     nodes = nodes.filter(n => n.parentId === 0);
+    const executeLog = []
     // 迭代执行所有分支
-    await runNodes(nodes)
+    const rstss = await runNodes(nodes, undefined, executeLog);
+    const end = new Date();
+    await FlowHistory.create({
+        flowId: flowId,
+        triggeredAt: dayjs(triggerdTime).toDate(),
+        executeStartAt: start,
+        executeEndAt: end,
+        processInfo: JSON.stringify(executeLog),
+        createdAt: new Date()
+    });
 };
 
 export const run = async () => {
