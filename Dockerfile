@@ -1,5 +1,5 @@
 FROM node:alpine
-WORKDIR /cronflow-agent
+WORKDIR /cronflow
 COPY package.json .
 RUN npm run taobao
 COPY . .

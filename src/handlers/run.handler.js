@@ -1,9 +1,13 @@
 import { Op } from 'sequelize';
-import { uniq, find } from 'lodash';
+import {
+    uniq, find, get, replace,
+} from 'lodash';
 import {
     Flow, Node, Plugin,
 } from '../models';
 
+
+/* eslint-disable */
 export const runNodes = async (flowNodes, previewData) => {
     const conditioned = flowNodes.filter(n => n.signal === 'ANY');// 需要执行的node
     if (previewData && previewData.code === true) {
@@ -14,11 +18,35 @@ export const runNodes = async (flowNodes, previewData) => {
     }
     for (let i = 0, len = conditioned.length; i < len; i += 1) {
         const currentNode = conditioned[i];
-        // eslint-disable-next-line
-        const { Execute } = require(currentNode.pluginInfo.pluginCompiledPath)
-        Execute(JSON.parse(currentNode.configurations));
+        const { Execute } = require(currentNode.pluginInfo.pluginCompiledPath);
+        // process plugin configuration use preview data
+        const configurations = JSON.parse(currentNode.configurations);
+
+        Object.keys(configurations).forEach((key) => {
+            const v = configurations[key];
+            if (v.indexOf('${preview}') > -1) {
+                configurations[key] = get(previewData, replace(v, '${preview}', 'data'));
+            }
+        });
+
+        try {
+            const nextData = await Execute({ data: configurations });
+            Logger.log(`[SUCCESS] Flow(${currentNode.flowId})/Node(${currentNode.nodeId}) - ${currentNode.signal}`)
+            runNodes(currentNode.children, nextData);
+        } catch (exp) {
+            // 如果插件没有handle住异常，agent构建信息向下传递
+            const nextData = {
+                code: false,
+                error: exp,
+                data: {},
+            };
+            Logger.log(`[FAILURE] Flow(${currentNode.flowId})/Node(${currentNode.nodeId}) - ${currentNode.signal}, ${exp.message}`)
+            runNodes(currentNode.children, nextData);
+        }
     }
 };
+/* eslint-disable */
+
 /*
 const rst = {
         code: response.statusCode && /^2/.test(`${response.statusCode}`),
@@ -54,8 +82,8 @@ export const runTypeC = async (flowId, triggerdTime) => {
         item.children = nodes.filter(node => node.parentId === item.nodeId);
     }
     nodes = nodes.filter(n => n.parentId === 0);
-    Logger.log(JSON.stringify(nodes));
     // 迭代执行所有分支
+    await runNodes(nodes)
 };
 
 export const run = async () => {
@@ -63,6 +91,7 @@ export const run = async () => {
     const triggered = await redis.rpop('croned');
     if (!triggered) {
         // no job triggered. run refresh job
+        return;
     }
     // c_1_2018-08-27 09:50:00
     const [flowType, flowId, triggerdTime] = triggered.split('_');
