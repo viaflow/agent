@@ -7,7 +7,7 @@
   "scripts": {
     "lint": "esw -w src test",
     "test": "jest --watch",
-    "dev": "nodemon --ignore plugins src/index.js --exec \"node -r babel-register\"",
+    "dev": "nodemon --ignore plugins --ignore public src/index.js --exec \"node -r babel-register\"",
     "local": "docker-compose -f docker-compose.dev.yml up",
     "taobao": "npm i --no-package-lock --registry=https://registry.npm.taobao.org",
     "build": "npm run clean && mkdir -p dist && babel src -s -D -d dist",
@@ -47,7 +47,7 @@
     "testEnvironment": "node"
   },
   "devDependencies": {
-    "babel-eslint": "^8.2.6",
+    "babel-eslint": "^9.0.0",
     "eslint": "^5.4.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",

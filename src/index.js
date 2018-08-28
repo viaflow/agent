@@ -5,6 +5,7 @@ init.forEach((i) => {
     i();
 });
 const entry = require('./handlers/run.handler');
+const refresh = require('./handlers/refresh.handler').default;
 /**
  * 轮询Job队列（以后可能替换掉redis）
  * 如果存在被触发的Job，去数据库检查Plugin的最后更新日期信息
@@ -24,12 +25,16 @@ const setIntervalAsync = (callback, ms) => {
 //     setTimeout(resolve, deplayMs);
 // });
 
-setIntervalAsync(async () => {
-    try {
-        await entry.run();
-    } catch (e) {
-        Logger.error(e.message);
-    }
-}, 3000);
-
+// download plugin when start
+refresh().then(() => {
+    setIntervalAsync(async () => {
+        try {
+            await entry.run();
+        } catch (e) {
+            Logger.error(e.message);
+        }
+    }, 3000);
+}).catch((exp) => {
+    Logger.error(`Agent faild to start because ${exp.message}`);
+});
 // more logic here or in setIntervalAsync callback
