@@ -22,3 +22,4 @@ services:
       - REDIS_PORT=6379
       - REDIS_AUTH=cronflow
       - REDIS_DB=0
+      - NPM_REGISTRY_TAOBAO=true

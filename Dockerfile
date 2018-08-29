@@ -4,4 +4,5 @@ WORKDIR /cronflow
 COPY package.json .
 RUN npm run taobao
 COPY . .
+RUN npm run build
 CMD ["node", "dist/index.js"]
