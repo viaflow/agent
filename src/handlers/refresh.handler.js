@@ -1,8 +1,8 @@
 // refresh plugins
 import { spawnSync } from 'child_process';
+import rimraf from 'rimraf';
 import { Plugin } from '../models';
 import { clone, checkout } from '../../utils/git.utils';
-import { removeDir } from '../../utils/fs.utils';
 import { applicationConf } from '../init/config';
 
 /* *
@@ -20,7 +20,7 @@ export default async () => {
     plugins.forEach((plugin) => {
         Logger.log(`Process plugin ${plugin.pluginName} to ${plugin.pluginPath}`);
         // rm dir
-        // removeDir(plugin.pluginPath);
+        rimraf.sync(plugin.pluginPath);
         // git clone
         clone(plugin.pluginRepo, plugin.pluginTargetDir);
         // git checkout
