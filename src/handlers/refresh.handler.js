@@ -4,7 +4,7 @@ import rimraf from 'rimraf';
 import { Plugin } from '../models';
 import { clone, checkout } from '../../utils/git.utils';
 import { applicationConf } from '../init/config';
-
+import { isExistsDir } from '../../utils/fs.utils';
 /* *
  * 查询数据库中存在的所有plugin
  * clone checkout
@@ -20,7 +20,9 @@ export default async () => {
     plugins.forEach((plugin) => {
         Logger.log(`Process plugin ${plugin.pluginName} to ${plugin.pluginPath}`);
         // rm dir
-        rimraf.sync(plugin.pluginPath);
+        if (isExistsDir(plugin.pluginPath)) {
+            rimraf.sync(plugin.pluginPath);
+        }
         // git clone
         clone(plugin.pluginRepo, plugin.pluginTargetDir);
         // git checkout
