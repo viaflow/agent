@@ -3,7 +3,7 @@
   "code": "agnet",
   "version": "1.0.0",
   "description": "cronflow agnet to handle cronjobs that triggered",
-  "main": "dist/index.js",
+  "main": "dist/src/index.js",
   "scripts": {
     "lint": "esw -w src test",
     "clean": "rimraf dist",
@@ -11,8 +11,8 @@
     "dev": "nodemon src/index.js --watch './src/' --exec \"node -r babel-register\"",
     "local": "docker-compose -f docker-compose.dev.yml up",
     "taobao": "npm i --no-package-lock --registry=https://registry.npm.taobao.org",
-    "build": "npm run clean && mkdir -p dist && babel ./ --ignore node_modules/ --out-dir dist --copy-files",
-    "start": "node dist/index.js",
+    "build": "npm run clean && mkdir -p dist && babel ./ --ignore node_modules,plugins --out-dir dist --copy-files",
+    "start": "node dist/src/index.js",
     "prestart": "npm run -s build"
   },
   "repository": {
