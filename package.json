@@ -47,16 +47,6 @@
   "jest": {
     "testEnvironment": "node"
   },
-  "devDependencies": {
-    "babel-eslint": "^9.0.0",
-    "eslint": "^5.4.0",
-    "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-jest": "^21.22.0",
-    "eslint-watch": "^4.0.2",
-    "jest": "^23.5.0",
-    "nodemon": "^1.18.3"
-  },
   "dependencies": {
     "alphabetjs": "^0.1.4",
     "babel-cli": "^6.26.0",
@@ -71,5 +61,15 @@
     "rimraf": "^2.6.2",
     "sequelize": "^4.38.0",
     "tracer": "^0.9.1"
+  },
+  "devDependencies": {
+    "babel-eslint": "^9.0.0",
+    "eslint": "^5.5.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jest": "^21.22.0",
+    "eslint-watch": "^4.0.2",
+    "jest": "^23.5.0",
+    "nodemon": "^1.18.4"
   }
 }
